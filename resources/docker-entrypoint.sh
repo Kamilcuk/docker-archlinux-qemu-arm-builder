@@ -9,7 +9,7 @@ pacman-db-upgrade
 pacman -S --noconfirm pacman ca-certificates ca-certificates-mozilla archlinux-keyring
 
 ## install packages
-pacman -Suy --noconfirm pacman arch-install-scripts sudo base-devel wget curl
+pacman -Suy --noconfirm pacman arch-install-scripts sudo base-devel wget curl openssh sshfs
 
 ## enable sudo from nobody
 echo "nobody ALL=(ALL:ALL) NOPASSWD: ALL" | (VISUAL="tee -a" EDITOR="tee -a" visudo)
@@ -35,9 +35,9 @@ cd /qemu-user-static && yes Y | sudo -u nobody makepkg -i
 #mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
 #update-binfmts --enable qemu-arm
 
-rootfsarchive=ArchLinuxARM-rpi-2-latest.tar.gz
-wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
-rootfsarchive=ArchLinuxARM-armv7-latest.tar.gz
-wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
+#rootfsarchive=ArchLinuxARM-rpi-2-latest.tar.gz
+#wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
+#rootfsarchive=ArchLinuxARM-armv7-latest.tar.gz
+#wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
 
 
