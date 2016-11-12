@@ -9,19 +9,18 @@ pacman-db-upgrade
 pacman -S --noconfirm pacman ca-certificates ca-certificates-mozilla archlinux-keyring
 
 ## install packages
-pacman -Suy --noconfirm pacman arch-install-scripts sudo base-devel wget curl openssh sshfs
+echo -ne "[archlinuxfr]\nServer = http://repo.archlinux.fr/\$arch\n" >> /etc/pacman.conf
+pacman -Suy --noconfirm pacman arch-install-scripts sudo base-devel wget curl openssh sshfs rsync xmlto kmod git bc lzop coreutils linux-firmware kmod mkinitcpio rsync yaourt
 
-## enable sudo from nobody
+## enable sudo from nobody , for 'sudo -u nobody makepkg -i' to work
 echo "nobody ALL=(ALL:ALL) NOPASSWD: ALL" | (VISUAL="tee -a" EDITOR="tee -a" visudo)
+# FIX stupid bug when sudo inside docker
 sed -e "/nice/s/\*/#*/" -i /etc/security/limits.conf
 
 ## install packages from aur
-echo -ne "[archlinuxfr]\nServer = http://repo.archlinux.fr/\$arch\n" >> /etc/pacman.conf
-pacman -Sy --noconfirm yaourt
 sudo -u nobody yaourt -S --noconfirm binfmt-support #qemu-user-static
 
 # qemu-user-static byl updatowany 8 listopada i jeszcze nie działa :( :( :(
-pacman -S --noconfirm git
 git clone https://aur.archlinux.org/qemu-user-static.git /qemu-user-static
 chown "nobody:nobody" -R /qemu-user-static
 cd /qemu-user-static && sed -i PKGBUILD -e "s/^_debsrc=.*/_debsrc=\${pkgname}_\${pkgver}+dfsg-3+b1_\${_arch}.deb/" -e "s/^sha1sums=.*/sha1sums=('f557e92dddb0b0a81a80ba69474295073b364574')/"
