@@ -28,7 +28,17 @@ echo -n "> "; read p
 
 set -x
 mntdir="$(mktemp -d)"
-trap 'fusermount -u $mntdir 2>/dev/null; umount $mntdir; rmdir $mntdir;' EXIT
+cleanup() {
+	if [ -d $mntdir ]; then
+	      	if findmnt $mntdir; then
+			echo "cleanup - unmounting mntdir"
+		       fusermount -u $mntdir
+		fi
+		echo "cleanup - removing mntdir"
+		rmdir $mntdir
+	fi
+}
+trap cleanup EXIT
 [ ! -e $mntdir ] && mkdir -p $mntdir
 
 echo "Mounting sshfs $SSHFS_HOST"
@@ -38,8 +48,5 @@ cp $FILES $mntdir/
 
 echo "Executing repo-add command"
 repo-add $REPO_ADD_ARGS $mntdir/$REPO.db.tar.gz $FILES
-echo "Cleanup - umount"
-fusermount -u $mntdir || umount $mntdir
-echo "Cleanup - removing tmpdir"
-rmdir $mntdir
 
+exit ## execute cleanup function
