@@ -35,11 +35,9 @@ cd /qemu-user-static && yes Y | sudo -u nobody makepkg -i
 #mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
 #update-binfmts --enable qemu-arm
 
-# zabuforowane wersje ArchLinux-a przchowywane w katalogu domowym
 rootfsarchive=ArchLinuxARM-rpi-2-latest.tar.gz
 wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
 rootfsarchive=ArchLinuxARM-armv7-latest.tar.gz
 wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
-
 
 
