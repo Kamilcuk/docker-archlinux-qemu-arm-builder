@@ -2,41 +2,46 @@
 
 set -xe
 
-### init
-sed -e "/^SigLevel/s/SigLevel.*/SigLevel = TrustAll/" -i /etc/pacman.conf
-pacman -Sy --noconfirm pacman
-pacman-db-upgrade
-pacman -S --noconfirm pacman ca-certificates ca-certificates-mozilla archlinux-keyring
+### not needed for finalduty/archlinux
+# ### init
+# sed -e "/^SigLevel/s/SigLevel.*/SigLevel = Never/" -i /etc/pacman.conf
+# pacman -Sy --noconfirm pacman
+# pacman-db-upgrade
+# pacman -S --noconfirm pacman ca-certificates ca-certificates-mozilla archlinux-keyring
 
-## install packages
-echo -ne "[archlinuxfr]\nServer = http://repo.archlinux.fr/\$arch\n" >> /etc/pacman.conf
-pacman -Suy --noconfirm pacman arch-install-scripts sudo base-devel wget curl openssh sshfs rsync xmlto kmod git bc lzop coreutils linux-firmware kmod mkinitcpio rsync yaourt
+## install all packages
+# libpipeline - binfmt-support
+# yajl - package-query dependency
+pacman -Suy --noconfirm --noprogressbar arch-install-scripts sudo base-devel wget curl openssh sshfs rsync xmlto kmod git bc lzop coreutils linux-firmware mkinitcpio libpipeline yajl
 
-## enable sudo from nobody , for 'sudo -u nobody makepkg -i' to work
+## enable sudo from nobody with nopasword, for 'sudo -u nobody makepkg -i' to work
 echo "nobody ALL=(ALL:ALL) NOPASSWD: ALL" | (VISUAL="tee -a" EDITOR="tee -a" visudo)
-# FIX stupid bug when sudo inside docker
+
+## FIX stupid bug when sudo inside docker
+#http://bit-traveler.blogspot.com/2015/11/sudo-error-within-docker-container-arch.html
 sed -e "/nice/s/\*/#*/" -i /etc/security/limits.conf
 
-## install packages from aur
-sudo -u nobody yaourt -S --noconfirm binfmt-support #qemu-user-static
+## install_from_aur
+install_from_aur() {
+	local name=$1
+	local tmpdir=/home/$name
+	git clone https://aur.archlinux.org/$name.git $tmpdir
+	chown nobody:nobody -R $tmpdir
+	pushd $tmpdir
+	sudo -Eu nobody makepkg --noconfirm --nosign -si
+	popd
+	rm -rf $tmpdir
+}
 
-# qemu-user-static byl updatowany 8 listopada i jeszcze nie działa :( :( :(
-git clone https://aur.archlinux.org/qemu-user-static.git /qemu-user-static
-chown "nobody:nobody" -R /qemu-user-static
-cd /qemu-user-static && sed -i PKGBUILD -e "s/^_debsrc=.*/_debsrc=\${pkgname}_\${pkgver}+dfsg-3+b1_\${_arch}.deb/" -e "s/^sha1sums=.*/sha1sums=('f557e92dddb0b0a81a80ba69474295073b364574')/"
-cd /qemu-user-static && yes Y | sudo -u nobody makepkg -i
+## install yaourt
+install_from_aur package-query
+install_from_aur yaourt
 
-### not needed for build
-# error - błąd! niestety, z powodu tego że jesteśmy w dockerze
-# filesystem binfmt_misc jest nie podmontowany
-# potrzebujemy uruchomić się z --privileged / lub cap_add SYS_ADMIN 
-#, i zrobić: mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
-#mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
-#update-binfmts --enable qemu-arm
+## install binfmt and qemu-user-static
+install_from_aur binfmt-support
+install_from_aur qemu-user-static
 
-#rootfsarchive=ArchLinuxARM-rpi-2-latest.tar.gz
-#wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
-#rootfsarchive=ArchLinuxARM-armv7-latest.tar.gz
-#wget -c -O ~/$rootfsarchive http://os.archlinuxarm.org/os/$rootfsarchive
+## cleanup
+yes Y | pacman -Scc
 
 
