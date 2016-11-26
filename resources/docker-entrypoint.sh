@@ -16,7 +16,7 @@ linaro=gcc-linaro-6.1.1-2016.08-x86_64_arm-linux-gnueabihf
 echo "===> Update&install all needed packages"
 # libpipeline - binfmt-support dependency
 # yajl - package-query dependency
-pacman -Suy --noconfirm --noprogressbar arch-install-scripts sudo base-devel wget curl openssh sshfs rsync xmlto kmod git bc lzop coreutils linux-firmware mkinitcpio libpipeline yajl
+pacman -Suy --noconfirm --noprogressbar arch-install-scripts sudo base-devel wget curl openssh sshfs rsync xmlto kmod git bc lzop coreutils linux-firmware mkinitcpio libpipeline yajl unzip
 
 echo "===> enable sudo from nobody with nopasword, for 'sudo -u nobody makepkg -i' to work"
 echo "nobody ALL=(ALL:ALL) NOPASSWD: ALL" | (VISUAL="tee -a" EDITOR="tee -a" visudo)
